@@ -5,12 +5,17 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.worldgen.features.TreeFeatures;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 
 import java.util.*;
 
@@ -75,10 +80,22 @@ public class TreeCommand {
                             ServerLevel world = source.getLevel();
 
                             int grown = 0;
+
                             for (BlockPos pos : TreePlaceStickItem.placedSaplings) {
-                                if (world.getBlockState(pos).getBlock() == Blocks.OAK_SAPLING) {
-                                    Blocks.OAK_SAPLING.randomTick(world.getBlockState(pos), world, pos, world.getRandom());
-                                    grown++;
+                                if (world.getBlockState(pos).is(Blocks.OAK_SAPLING)) {
+                                    world.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+
+                                    try {
+                                        Holder<ConfiguredFeature<?, ?>> treeFeature =
+                                                world.registryAccess()
+                                                        .registryOrThrow(Registries.CONFIGURED_FEATURE)
+                                                        .getHolderOrThrow(TreeFeatures.OAK);
+
+                                        treeFeature.value().place(world, world.getChunkSource().getGenerator(), world.getRandom(), pos);
+                                        grown++;
+                                    } catch (Exception e) {
+                                        source.sendFailure(Component.literal("[ERROR] Failed to grow tree at " + pos + ": " + e));
+                                    }
                                 }
                             }
 
@@ -87,6 +104,8 @@ public class TreeCommand {
                             source.sendSuccess(() -> Component.literal("Grew " + finalGrown + " trees."), true);
                             return 1;
                         })));
+
+
     }
 
 
