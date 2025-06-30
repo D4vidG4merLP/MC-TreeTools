@@ -1,0 +1,8 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+[[mods]]
+modId="treetools"
+version="2.0.0"
+displayName="Tree Tools Mod"
+description='''Several Tree tools to make creative Building Easier'''
