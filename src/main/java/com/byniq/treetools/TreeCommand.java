@@ -10,6 +10,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.TreeFeatures;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -23,6 +24,15 @@ import net.minecraft.world.level.levelgen.feature.configurations.TreeConfigurati
 import java.util.*;
 
 public class TreeCommand {
+
+    private static final Map<Block, ResourceKey<ConfiguredFeature<?, ?>>> SAPLING_TO_FEATURE = Map.of(
+            Blocks.OAK_SAPLING, TreeFeatures.OAK,
+            Blocks.BIRCH_SAPLING, TreeFeatures.BIRCH,
+            Blocks.SPRUCE_SAPLING, TreeFeatures.SPRUCE,
+            Blocks.JUNGLE_SAPLING, TreeFeatures.JUNGLE_TREE,
+            Blocks.ACACIA_SAPLING, TreeFeatures.ACACIA,
+            Blocks.DARK_OAK_SAPLING, TreeFeatures.DARK_OAK
+    );
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("trees")
@@ -78,19 +88,25 @@ public class TreeCommand {
                             int grown = 0;
 
                             for (BlockPos pos : TreePlaceStickItem.placedSaplings) {
-                                if (world.getBlockState(pos).is(Blocks.OAK_SAPLING)) {
+                                BlockState state = world.getBlockState(pos);
+                                Block block = state.getBlock();
+
+                                if (SAPLING_TO_FEATURE.containsKey(block)) {
+                                    ResourceKey<ConfiguredFeature<?, ?>> featureKey = SAPLING_TO_FEATURE.get(block);
+
+                                    // Remove sapling first
                                     world.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
 
                                     try {
-                                        Holder<ConfiguredFeature<?, ?>> treeFeature =
+                                        Holder<ConfiguredFeature<?, ?>> holder =
                                                 world.registryAccess()
                                                         .registryOrThrow(Registries.CONFIGURED_FEATURE)
-                                                        .getHolderOrThrow(TreeFeatures.OAK);
+                                                        .getHolderOrThrow(featureKey);
 
-                                        treeFeature.value().place(world, world.getChunkSource().getGenerator(), world.getRandom(), pos);
+                                        holder.value().place(world, world.getChunkSource().getGenerator(), world.getRandom(), pos);
                                         grown++;
                                     } catch (Exception e) {
-                                        source.sendFailure(Component.literal("[ERROR] Failed to grow tree at " + pos + ": " + e));
+                                        source.sendFailure(Component.literal("[ERROR] Could not grow tree at " + pos + ": " + e));
                                     }
                                 }
                             }
@@ -100,6 +116,7 @@ public class TreeCommand {
                             source.sendSuccess(() -> Component.literal("Grew " + finalGrown + " trees."), true);
                             return 1;
                         })));
+
 
 
     }

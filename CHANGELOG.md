@@ -14,3 +14,9 @@
 ! Fixed Tree_Stick Texture
 ! Fixed Tree_Stick Name
 ```
+
+## [v1.2] - 30.06.2025
+
+```diff
+! Fixed Trees other than Oak not growing with /trees grow
+```

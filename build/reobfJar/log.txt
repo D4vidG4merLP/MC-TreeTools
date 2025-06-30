@@ -122,6 +122,7 @@ Adding Libraries to Inheritance
 Reading Input: /home/david/Documents/forge-1.20.1-47.4.0-mdk/build/libs/examplemod-1.0.0.jar
 Adding input to inheritance map
 Processing entries
+Conflicting propagated mapping for com/byniq/treetools/TreePlaceStickItem/appendHoverText(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/Level;Ljava/util/List;Lnet/minecraft/world/item/TooltipFlag;)V from net/minecraft/world/item/Item/appendHoverText(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/Level;Ljava/util/List;Lnet/minecraft/world/item/TooltipFlag;)V: appendHoverText -> m_7373_
 Conflicting propagated mapping for com/byniq/treetools/TreePlaceStickItem/useOn(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult; from net/minecraft/world/item/Item/useOn(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult;: useOn -> m_6225_
 Conflicting propagated mapping for net/minecraft/world/entity/LivingEntity/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V from net/minecraft/world/entity/player/Player/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V: lambda$addAdditionalSaveData$3 -> m_219754_
 Adding extras
@@ -130,6 +131,13 @@ Writing Output: /home/david/Documents/forge-1.20.1-47.4.0-mdk/build/reobfJar/out
   META-INF/
   META-INF/MANIFEST.MF
   META-INF/mods.toml
+  assets/
+  assets/treetools/
+  assets/treetools/lang/
+  assets/treetools/lang/en_us.json
+  assets/treetools/models/
+  assets/treetools/models/item/
+  assets/treetools/models/item/tree_stick.json
   com/
   com/byniq/
   com/byniq/treetools/
