@@ -8,9 +8,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.TreeFeatures;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -41,37 +44,30 @@ public class TreeCommand {
                                 .then(Commands.argument("density", IntegerArgumentType.integer(0, 100))
                                         .executes(ctx -> {
                                             CommandSourceStack source = ctx.getSource();
-                                            source.sendSuccess(() -> Component.literal("[DEBUG] /trees place command executed"), true);
+                                            ServerPlayer player = source.getPlayerOrException();
+                                            Level level = player.level();
 
                                             int range = IntegerArgumentType.getInteger(ctx, "range");
                                             int density = IntegerArgumentType.getInteger(ctx, "density");
-                                            source.sendSuccess(() -> Component.literal("[DEBUG] Parsed range=" + range + ", density=" + density), true);
 
-                                            ItemStack stick;
-                                            try {
-                                                stick = TreePlaceStickItem.create(range, density);
-                                            } catch (Exception e) {
-                                                source.sendFailure(Component.literal("[ERROR] Failed to create stick: " + e));
-                                                e.printStackTrace();
-                                                return 0;
-                                            }
+                                            ItemStack mainHand = player.getMainHandItem();
 
-                                            source.sendSuccess(() -> Component.literal("[DEBUG] Created stick with tag: " + stick.getTag()), true);
-
-                                            if (source.getPlayer() != null) {
-                                                try {
-                                                    source.getPlayer().addItem(stick);
-                                                    source.sendSuccess(() -> Component.literal("[DEBUG] Stick given to player"), true);
-                                                } catch (Exception e) {
-                                                    source.sendFailure(Component.literal("[ERROR] Failed to give stick: " + e));
-                                                    e.printStackTrace();
-                                                    return 0;
-                                                }
-                                                return 1;
+                                            if (mainHand.getItem() instanceof TreePlaceStickItem) {
+                                                // ✅ Player already holds the tree stick — update NBT
+                                                CompoundTag tag = mainHand.getOrCreateTag();
+                                                tag.putInt("Range", range);
+                                                tag.putInt("Density", density);
+                                                player.displayClientMessage(Component.literal("Updated Tree Stick: range " + range + ", density " + density), true);
                                             } else {
-                                                source.sendFailure(Component.literal("[ERROR] Command must be run by a player"));
-                                                return 0;
+                                                // ❌ Not holding one — give new stick
+                                                ItemStack stick = TreePlaceStickItem.create(range, density);
+                                                if (!player.getInventory().add(stick)) {
+                                                    player.drop(stick, false);
+                                                }
+                                                player.displayClientMessage(Component.literal("Given Tree Stick with range " + range + ", density " + density), true);
                                             }
+
+                                            return 1;
                                         }))))
 
                 .then(Commands.literal("grow")

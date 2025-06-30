@@ -3,6 +3,6 @@ loaderVersion="[47,)"
 license="MIT"
 [[mods]]
 modId="treetools"
-version="1.0"
+version="1.1"
 displayName="Tree Tools Mod"
 description='''Several Tree tools to make creative Building Easier'''
